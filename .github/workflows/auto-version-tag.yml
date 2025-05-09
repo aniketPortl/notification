@@ -62,9 +62,9 @@ jobs:
           echo "Target: $target"
 
           case "$source->$target" in
-            feature/*->feature)
+            feat/*->feature)
               minor=$((minor + 1)); patch=0; suffix="-FEATURE" ;;
-            breaking/*->breaking)
+            break/*->breaking)
               minor=$((minor + 1)); patch=0; suffix="-BREAKING" ;;
             feature->develop)
               minor=$((minor + 1)); patch=0; suffix="-DEVELOP" ;;
