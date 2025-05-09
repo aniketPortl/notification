@@ -8,7 +8,7 @@ on:
       - hotfix
       - master
       - feature
-      - break
+      - breaking
     types: [closed]
 
 jobs:
