@@ -64,36 +64,45 @@ jobs:
           echo "Source: $source"
           echo "Target: $target"
 
-          case "$source->$target" in
-            "feat/*->feature")
-              minor=$((minor + 1)); patch=0; suffix="-FEATURE" ;;
-            "break/*->breaking")
-              minor=$((minor + 1)); patch=0; suffix="-BREAKING" ;;
-            "feature->develop")
-              minor=$((minor + 1)); patch=0; suffix="-DEVELOP" ;;
-            "breaking->develop")
-              major=$((major + 1)); minor=0; patch=0; suffix="-DEVELOP" ;;
-            "hotfix/*->hotfix")
-              patch=$((patch + 1)); suffix="-HOTFIX" ;;
-            "develop->release")
-              last_tag=$(git tag --sort=-v:refname | grep -E '^v[0-9]+\.[0-9]+\.[0-9]+-DEVELOP$' | head -n1)
-              version=$(echo "$last_tag" | sed -E 's/^v(.*)-DEVELOP$/\1/')
-              IFS='.' read -r major minor patch <<< "$version"
-              suffix="-RELEASE" ;;
-            "release->master")
-              last_tag=$(git tag --sort=-v:refname | grep -E '^v[0-9]+\.[0-9]+\.[0-9]+-RELEASE$' | head -n1)
-              version=$(echo "$last_tag" | sed -E 's/^v(.*)-RELEASE$/\1/')
-              IFS='.' read -r major minor patch <<< "$version" ;;
-            "hotfix->master")
-              patch=$((patch + 1)) ;;
-            "bugfix/*->develop")
-              echo "Skipping tag for bugfix/* -> develop"
-              echo "skip=true" >> $GITHUB_OUTPUT
-              exit 0 ;;
-            *)
-              echo "Unhandled branch flow: $source -> $target"
-              exit 1 ;;
-          esac
+          if [[ "$source" == feat/* && "$target" == "feature" ]]; then
+            minor=$((minor + 1)); patch=0; suffix="-FEATURE"
+
+          elif [[ "$source" == break/* && "$target" == "breaking" ]]; then
+            minor=$((minor + 1)); patch=0; suffix="-BREAKING"
+
+          elif [[ "$source" == "feature" && "$target" == "develop" ]]; then
+            minor=$((minor + 1)); patch=0; suffix="-DEVELOP"
+
+          elif [[ "$source" == "breaking" && "$target" == "develop" ]]; then
+            major=$((major + 1)); minor=0; patch=0; suffix="-DEVELOP"
+
+          elif [[ "$source" == hotfix/* && "$target" == "hotfix" ]]; then
+            patch=$((patch + 1)); suffix="-HOTFIX"
+
+          elif [[ "$source" == "develop" && "$target" == "release" ]]; then
+            last_tag=$(git tag --sort=-v:refname | grep -E '^v[0-9]+\.[0-9]+\.[0-9]+-DEVELOP$' | head -n1)
+            version=$(echo "$last_tag" | sed -E 's/^v(.*)-DEVELOP$/\1/')
+            IFS='.' read -r major minor patch <<< "$version"
+            suffix="-RELEASE"
+
+          elif [[ "$source" == "release" && "$target" == "master" ]]; then
+            last_tag=$(git tag --sort=-v:refname | grep -E '^v[0-9]+\.[0-9]+\.[0-9]+-RELEASE$' | head -n1)
+            version=$(echo "$last_tag" | sed -E 's/^v(.*)-RELEASE$/\1/')
+            IFS='.' read -r major minor patch <<< "$version"
+
+          elif [[ "$source" == "hotfix" && "$target" == "master" ]]; then
+            patch=$((patch + 1))
+
+          elif [[ "$source" == bugfix/* && "$target" == "develop" ]]; then
+            echo "Skipping tag for bugfix/* -> develop"
+            echo "skip=true" >> $GITHUB_OUTPUT
+            exit 0
+
+          else
+            echo "❌ Unhandled branch flow: $source -> $target"
+            exit 1
+          fi
+
 
           new_version="$major.$minor.$patch$suffix"
           tag="v$new_version"
