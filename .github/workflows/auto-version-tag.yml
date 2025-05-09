@@ -7,6 +7,9 @@ on:
       - release
       - hotfix
       - master
+      - feat
+      - break
+    types: [closed]
 
 jobs:
   tag-version:
