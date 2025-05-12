@@ -8,7 +8,7 @@ on:
       - hotfix
       - master
       - feature
-      - breaking
+      - major
     types: [closed]
 
 jobs:
@@ -65,15 +65,15 @@ jobs:
           echo "Target: $target"
 
           if [[ "$source" == feat/* && "$target" == "feature" ]]; then
-            minor=$((minor + 1)); patch=0; suffix="-FEATURE"
+            suffix="-FEATURE"
 
-          elif [[ "$source" == break/* && "$target" == "breaking" ]]; then
-            minor=$((minor + 1)); patch=0; suffix="-BREAKING"
+          elif [[ "$source" == break/* && "$target" == "major" ]]; then
+            suffix="-MAJOR"
 
           elif [[ "$source" == "feature" && "$target" == "develop" ]]; then
             minor=$((minor + 1)); patch=0; suffix="-DEVELOP"
 
-          elif [[ "$source" == "breaking" && "$target" == "develop" ]]; then
+          elif [[ "$source" == "major" && "$target" == "develop" ]]; then
             major=$((major + 1)); minor=0; patch=0; suffix="-DEVELOP"
 
           elif [[ "$source" == hotfix/* && "$target" == "hotfix" ]]; then
